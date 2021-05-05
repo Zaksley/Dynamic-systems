@@ -107,7 +107,7 @@ def meth_epsilon(y0, t0, tf, eps, f ,meth):
         h /= 2
         i += 1
 
-    print(N)
+    #print(N)
     return yN
 
 ## Tests

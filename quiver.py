@@ -76,6 +76,6 @@ def draw_tangente_field_2D(F):
     plt.show()
 
 
-
-draw_tangente_field_1D(function_test_1D)
-#draw_tangente_field_2D(function_test_2d)
+if __name__ == "__main__":
+    draw_tangente_field_1D(function_test_1D)
+    draw_tangente_field_2D(function_test_2d)
