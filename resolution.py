@@ -15,7 +15,7 @@ from math import *
 # @return value at rank n+1
 #
 def step_euler(y, t, f, h):
-    return np.array(y + h*f(y, t))
+    return y + h*f(y, t)
 
 
 # Computes step n+1 with Middle point method
@@ -27,7 +27,7 @@ def step_euler(y, t, f, h):
 # @return value at rank n+1
 #
 def step_middle_point(y, t, f, h):
-    return np.array(y + h*f(y, t+(h/2)))
+    return y + h*f(y, t+(h/2.))
 
 # Computes step n+1 with Heun method
 #
@@ -41,7 +41,7 @@ def step_heun(y, t, f, h):
     p1 = f(y, t)
     y2 = y + h*p1
     p2 = f(y2, t+h)
-    return np.array(y + h*(p1+p2)/2)
+    return y + h*(p1+p2)/2.
 
 # Computes step n+1 with Heun method
 #
@@ -53,13 +53,13 @@ def step_heun(y, t, f, h):
 #
 def step_runge_kutta(y, t, f, h):
     p1 = f(y, t)
-    y2 = y + h*p1/2
-    p2 = f(y2, t+h/2)
-    y3 = y + h*p2/2
-    p3 = f(y3, t+h/2)
+    y2 = y + h*p1/2.
+    p2 = f(y2, t+h/2.)
+    y3 = y + h*p2/2.
+    p3 = f(y3, t+h/2.)
     y4 = y + h*p3
     p4 = f(y4, t+h)
-    return np.array(y + h*(p1+2*p2+2*p3+p4)/6)
+    return y + h*(p1+2*p2+2*p3+p4)/6.
 
 # Computes the value after N steps using a given method
 #
@@ -72,12 +72,12 @@ def step_runge_kutta(y, t, f, h):
 # @return value at rank N
 #
 def meth_n_step(y0, t0, N, h, f, meth):
-    y = np.array([0. for k in range(N)])
+    y = np.array([0. for k in range(N+1)])
     y[0] = y0
     t = t0
 
-    for i in range(N-1):
-        y[i+1] = meth(y[i], t, f, h)
+    for i in range(N):
+        y[i+1] = np.array(meth(y[i], t, f, h))
         t += h
 
     return y
@@ -96,19 +96,24 @@ def meth_epsilon(y0, t0, tf, eps, f ,meth):
     N = 10
     h = (tf - t0)/N
     i = 0
+    norm = []
 
     yN = meth_n_step(y0, t0, N, h, f, meth) #Computed before the first iteration
-    y2N = np.array([0])
+    y2N = meth_n_step(y0, t0, N*2, h/2., f, meth)
+    norm.append(np.linalg.norm(yN-y2N[::2], inf))
+    N *= 2
+    h /= 2.
 
-    while(np.linalg.norm(yN-y2N[::2], inf) > eps and i <= 10000):
+
+    while(norm[i] > eps and N <= 10000):
         yN = np.copy(y2N)
-        y2N = meth_n_step(y0, t0, 2*N, h/2, f, meth)
+        y2N = meth_n_step(y0, t0, 2*N, h/2., f, meth)
+        norm.append(np.linalg.norm(yN-y2N[::2], inf))
         N *= 2
-        h /= 2
+        h /= 2.
         i += 1
 
-    #print(N)
-    return yN
+    return (yN, norm)
 
 ## Tests
 
@@ -157,12 +162,12 @@ def test__step_euler_dim2():
 
 
 # Plots error between exp(-x) and its apprxomiation with error 10e-4
-def test__meth_epsilon_euler():
-    euler = meth_epsilon(1, 0, 2, 10e-4, f_exp, step_euler)
-    e = [exp(-i*(2/(len(euler)-1))) for i in range(len(euler))]
-    x = [k*2/len(euler) for k in range(len(e))]
+def test__euler():
+    (list, norm) = meth_epsilon(1, 0, 2, 10e-4, f_arcexp, step_euler)
+    e = [exp(atan(i*(2/(len(list)-1)))) for i in range(len(list))]
+    x = [k*2/len(list) for k in range(len(e))]
 
-    plt.plot(x, [abs(euler[k] - e[k]) for k in range(len(e))])
+    plt.plot(x, [abs(list[k] - e[k]) for k in range(len(e))])
     plt.yscale("log")
     plt.show()
     return
@@ -171,11 +176,11 @@ def test__meth_epsilon_euler():
 # Plots error between exp(arctan(x)) and its apprxomiation with error 10e-4
 # using middle point method
 def test__middle_point():
-    euler = meth_epsilon(1, 0, 2, 10e-4, f_arcexp, step_middle_point)
-    e = [exp(-i*(2/(len(euler)-1))) for i in range(len(euler))]
-    x = [k*2/len(euler) for k in range(len(e))]
+    (list, norm) = meth_epsilon(1, 0, 2, 10e-4, f_arcexp, step_middle_point)
+    e = [exp(atan(i*(2/(len(list)-1)))) for i in range(len(list))]
+    x = [k*2/len(list) for k in range(len(e))]
 
-    plt.plot(x, [abs(euler[k] - e[k]) for k in range(len(e))])
+    plt.plot(x, [abs(list[k] - e[k]) for k in range(len(e))])
     plt.yscale("log")
     plt.show()
     return
@@ -183,7 +188,7 @@ def test__middle_point():
 # Plots error between exp(arctan(x)) and its apprxomiation with error 10e-4
 # using heun method
 def test__heun():
-    list = meth_epsilon(1, 0, 2, 10e-4, f_arcexp, step_euler)
+    (list, norm) = meth_epsilon(1, 0, 2, 10e-4, f_arcexp, step_euler)
     e = [exp(atan(i*(2/(len(list)-1)))) for i in range(len(list))]
     x = [k*2/len(list) for k in range(len(e))]
 
@@ -195,7 +200,7 @@ def test__heun():
 # Plots error between exp(arctan(x)) and its apprxomiation with error 10e-4
 # using runge_kutta method
 def test__runge_kutta():
-    list = meth_epsilon(1, 0, 2, 10e-4, f_arcexp, step_runge_kutta)
+    (list, norm) = meth_epsilon(1, 0, 2, 10e-8, f_arcexp, step_runge_kutta)
     e = [exp(atan(i*(2/(len(list)-1)))) for i in range(len(list))]
     x = [k*2/len(list) for k in range(len(e))]
 
@@ -208,7 +213,7 @@ def test__runge_kutta():
 ## Main
 
 if __name__ == "__main__":
-    test__runge_kutta()
+    test__middle_point()
 
 
 
