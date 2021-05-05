@@ -98,7 +98,7 @@ def meth_epsilon(y0, t0, tf, eps, f ,meth):
     i = 0
     norm = []
 
-    yN = meth_n_step(y0, t0, N, h, f, meth) #Computed before the first iteration
+    yN = meth_n_step(y0, t0, N, h, f, meth)
     y2N = meth_n_step(y0, t0, N*2, h/2., f, meth)
     norm.append(np.linalg.norm(yN-y2N[::2], inf))
     N *= 2
@@ -113,7 +113,9 @@ def meth_epsilon(y0, t0, tf, eps, f ,meth):
         h /= 2.
         i += 1
 
-    return (yN, norm)
+    x = [k*(tf-t0)/N for k in range(N//2 + 1)]
+
+    return (yN, x, norm)
 
 ## Tests
 
@@ -163,9 +165,8 @@ def test__step_euler_dim2():
 
 # Plots error between exp(-x) and its apprxomiation with error 10e-4
 def test__euler():
-    (list, norm) = meth_epsilon(1, 0, 2, 10e-4, f_arcexp, step_euler)
+    (list, x, norm) = meth_epsilon(1, 0, 2, 10e-4, f_arcexp, step_euler)
     e = [exp(atan(i*(2/(len(list)-1)))) for i in range(len(list))]
-    x = [k*2/len(list) for k in range(len(e))]
 
     plt.plot(x, [abs(list[k] - e[k]) for k in range(len(e))])
     plt.yscale("log")
@@ -176,9 +177,8 @@ def test__euler():
 # Plots error between exp(arctan(x)) and its apprxomiation with error 10e-4
 # using middle point method
 def test__middle_point():
-    (list, norm) = meth_epsilon(1, 0, 2, 10e-4, f_arcexp, step_middle_point)
+    (list, x, norm) = meth_epsilon(1, 0, 2, 10e-4, f_arcexp, step_middle_point)
     e = [exp(atan(i*(2/(len(list)-1)))) for i in range(len(list))]
-    x = [k*2/len(list) for k in range(len(e))]
 
     plt.plot(x, [abs(list[k] - e[k]) for k in range(len(e))])
     plt.yscale("log")
@@ -188,9 +188,8 @@ def test__middle_point():
 # Plots error between exp(arctan(x)) and its apprxomiation with error 10e-4
 # using heun method
 def test__heun():
-    (list, norm) = meth_epsilon(1, 0, 2, 10e-4, f_arcexp, step_euler)
+    (list, x, norm) = meth_epsilon(1, 0, 2, 10e-4, f_arcexp, step_euler)
     e = [exp(atan(i*(2/(len(list)-1)))) for i in range(len(list))]
-    x = [k*2/len(list) for k in range(len(e))]
 
     plt.plot(x, [abs(list[k] - e[k]) for k in range(len(e))])
     plt.yscale("log")
@@ -200,9 +199,8 @@ def test__heun():
 # Plots error between exp(arctan(x)) and its apprxomiation with error 10e-4
 # using runge_kutta method
 def test__runge_kutta():
-    (list, norm) = meth_epsilon(1, 0, 2, 10e-8, f_arcexp, step_runge_kutta)
+    (list, x, norm) = meth_epsilon(1, 0, 2, 10e-8, f_arcexp, step_runge_kutta)
     e = [exp(atan(i*(2/(len(list)-1)))) for i in range(len(list))]
-    x = [k*2/len(list) for k in range(len(e))]
 
     plt.plot(x, [abs(list[k] - e[k]) for k in range(len(e))])
     plt.yscale("log")
@@ -213,7 +211,7 @@ def test__runge_kutta():
 ## Main
 
 if __name__ == "__main__":
-    test__middle_point()
+    test__runge_kutta()
 
 
 
