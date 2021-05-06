@@ -54,5 +54,28 @@ def verhulst_simulation(y0, croissance, max):
 
     return resolve
 
-print(malthus_simulation(2, 2, 1)[0])
-print(verhulst_simulation(2, 2, 3)[0])
+
+
+
+# === #
+#
+#   Question (3)
+#           Evolution sheep = Population sheep * (a = Coeff reproduction - b = bouffe_sheep * Population wolf)
+#           Modèle très similaire à Malthus
+#
+#           Evolution wolf = Population wolf * (c = reproduction en fonction des proies rencontrés * Population sheep - death wolf)
+#               
+#           a = reproduction sheep (constant)
+#           b = mortalité en fonction du nombre de wolfs
+#           c = reproduction en fonction du nombre de sheeps
+#           d = mortalité wolf (constant)
+# === #
+
+def lokta_simulation(reprod_sheep, death_sheep, reprod_wolf, death_wolf):
+    
+
+
+
+if __name__ == "__main__":
+    print(malthus_simulation(2, 2, 1)[0])
+    print(verhulst_simulation(2, 2, 3)[0])
