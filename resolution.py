@@ -82,6 +82,18 @@ def meth_n_step(y0, t0, N, h, f, meth):
 
     return y
 
+# Same as above, but with a multidimensionnal y (and y0)
+def meth_n_step_multidim(y0, t0, N, h, f, meth):
+    y = np.array([[[0. for i in range(len(y0))] for j in range(len(y0[0]))] for k in range(N+1)])
+    y[0] = np.copy(y0)
+    t = t0
+
+    for i in range(N):
+        y[i+1] = np.copy(np.array(meth(y[i], t, f, h)))
+        t += h
+
+    return y
+
 # Computes the value after N steps using a given method
 #
 # @param y0 value at initial parameter value
@@ -92,23 +104,28 @@ def meth_n_step(y0, t0, N, h, f, meth):
 # @param meth used method
 # @return approximation of y with error eps
 #
-def meth_epsilon(y0, t0, tf, eps, f ,meth):
+def meth_epsilon(y0, t0, tf, eps, f, meth):
     N = 10
     h = (tf - t0)/N
     i = 0
     norm = []
 
-    yN = meth_n_step(y0, t0, N, h, f, meth)
-    y2N = meth_n_step(y0, t0, N*2, h/2., f, meth)
-    norm.append(np.linalg.norm(yN-y2N[::2], inf))
+    if(isinstance(y0, int)):
+        dim_method = meth_n_step
+    else:
+        dim_method = meth_n_step_multidim
+
+    yN = dim_method(y0, t0, N, h, f, meth)
+    y2N = dim_method(y0, t0, N*2, h/2., f, meth)
+    norm.append(np.linalg.norm(yN-y2N[::2], inf, axis=-1))
     N *= 2
     h /= 2.
 
 
-    while(norm[i] > eps and N <= 10000):
+    while(np.mean(norm[i]) > eps and N <= 10000):
         yN = np.copy(y2N)
-        y2N = meth_n_step(y0, t0, 2*N, h/2., f, meth)
-        norm.append(np.linalg.norm(yN-y2N[::2], inf))
+        y2N = dim_method(y0, t0, 2*N, h/2., f, meth)
+        norm.append(np.linalg.norm(yN-y2N[::2], inf, axis=-1))
         N *= 2
         h /= 2.
         i += 1
