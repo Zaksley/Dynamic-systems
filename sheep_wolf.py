@@ -71,27 +71,25 @@ def verhulst_simulation(y0, croissance, max):
 #           d = mortalité wolf (constant)
 # === #
 
-def draw_2D(x, y_sheep, y_wolf, t0, tf):
-    plt.plot(x, y_sheep, 'b')
-    plt.plot(x, y_wolf, 'r')
+def draw_2D(x, y_sheep, y_wolf, t0, tf, i):
+    colors_sheep = ["greenyellow", "lawngreen", "chartreuse", "springgreen", "lime" , "limegreen", "forestgreen", "green", "darkgreen"]
+    colors_wolf = ['lightcoral', "coral", "salmon", "indianred", "orangered", "brown", "firebrick", "maroon", "red", "darkred"]
+    plt.plot(x, y_sheep, color=colors_sheep[i])
+    plt.plot(x, y_wolf, color=colors_wolf[i])
     plt.show() 
 
 
-def lokta_simulation(y0, reprod_sheep, death_sheep, reprod_wolf, death_wolf):
+def lokta_simulation(y0, reprod_sheep, death_sheep, reprod_wolf, death_wolf, t0, tf):
       # Method
     meth = step_runge_kutta
 
     # Initialisation 
-    t0 = 0
-    tf = 40
     epsilon = 10**-10
     
     def f(y, t):
         return np.array( [y[0] * (reprod_sheep - y[1]*death_sheep), y[1] * (reprod_wolf*y[0] - death_wolf) ]  )
  
     (resolve_y, resolve_x, norm) = meth_epsilon(y0, t0, tf, epsilon, f, meth)
-    print(resolve_y)
-    draw_2D(resolve_x, [resolve_y[k][0] for k in range(len(resolve_y))], [resolve_y[k][1] for k in range(len(resolve_y))], t0, tf); 
 
     return (resolve_y, resolve_x)
 
@@ -107,11 +105,27 @@ def period(y,t):
                 count += 1
             else:
                 t2=t[k]
-                count =+ 1
+                count += 1
         k += 1
     print(t2)
     print(t1)
     return t2- t1
+
+
+def draw_multiple_simulation(y0, a, b, c, d, pas, i, t0, tf):
+    
+    colors_sheep = ["greenyellow", "lawngreen", "chartreuse", "springgreen", "lime" , "limegreen", "forestgreen", "green", "greenyellow", "darkgreen", "greenyellow"]
+    colors_wolf = ['lightcoral', "coral", "salmon", "indianred", "orangered", "brown", "firebrick", "maroon", 'lightcoral', "red", "darkred", 'lightcoral']
+
+    for j in range(i):
+        y0 += pas
+        (resolve_y, resolve_x) = lokta_simulation(y0, a, b, c, d, t0, tf)
+        plt.plot(resolve_x,[resolve_y[k][0] for k in range(len(resolve_y))], color=colors_sheep[j])
+        plt.plot(resolve_x, [resolve_y[k][1] for k in range(len(resolve_y))], color=colors_wolf[j])
+    
+     #draw_2D(resolve_x, [resolve_y[k][0] for k in range(len(resolve_y))], [resolve_y[k][1] for k in range(len(resolve_y))], t0, tf, i)
+
+    plt.plot
 
 
 # Solutions
@@ -136,8 +150,22 @@ if __name__ == "__main__":
     b = 4/3
     c = 1
     d = 1
-    y0 = np.array([1, 1])
+    y0 = np.array([1.0, 1.0])
+    t0 = 0
+    tf = 40
 
-    (resolve_y, resolve_x ) = lokta_simulation(y0, a, b, c, d)
-    period_sheep = period([resolve_y[k][0] for k in range(len(resolve_y))], resolve_x)
-    print(period_sheep)
+        #Lokta simulation
+    #(resolve_y, resolve_x) = lokta_simulation(y0, a, b, c, d, t0, tf)
+    #draw_2D(resolve_x, [resolve_y[k][0] for k in range(len(resolve_y))], [resolve_y[k][1] for k in range(len(resolve_y))], t0, tf); 
+
+        #Period
+    #period_sheep = period([resolve_y[k][1] for k in range(len(resolve_y))], resolve_x)
+    #print(period_sheep)
+
+
+    pas = 0.1
+    i = 8
+    draw_multiple_simulation(y0, a, b, c, d, pas, i, t0, tf)
+
+
+    
