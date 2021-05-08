@@ -126,7 +126,7 @@ def meth_epsilon(y0, t0, tf, eps, f, meth):
     if(isinstance(y0, int) or isinstance(y0, float)):
         dim_method = meth_n_step
     else:
-        if(isinstance(y0[0], np.int32) or isinstance(y0[0], np.float64)):
+        if(isinstance(y0[0], np.int32) or isinstance(y0[0], np.int64) or isinstance(y0[0], np.float64)):
             dim_method = meth_n_step_2d
         else:
             dim_method = meth_n_step_3d

@@ -71,11 +71,50 @@ def verhulst_simulation(y0, croissance, max):
 #           d = mortalité wolf (constant)
 # === #
 
-def lokta_simulation(reprod_sheep, death_sheep, reprod_wolf, death_wolf):
-    
+def draw_2D(x, y, y2, t0, tf):
+    plt.plot(x, y, 'b')
+    plt.plot(x, y2, 'r')
+    plt.show() 
 
+
+def lokta_simulation(reprod_sheep, death_sheep, reprod_wolf, death_wolf):
+      # Method
+    meth = step_runge_kutta
+
+    # Initialisation 
+    t0 = 0
+    tf = 3
+    epsilon = 10**-10
+    
+    def f(y, t):
+        return np.array( [y[0] * (reprod_sheep - y[1]*death_sheep), y[1] * (reprod_wolf*y[0] - death_wolf) ]  )
+ 
+    y0 = np.array([20, 3])
+
+    (resolve_y, resolve_x, norm) = meth_epsilon(y0, t0, tf, epsilon, f, meth)
+    print(resolve_y)
+    draw_2D(resolve_x, [resolve_y[k][0] for k in range(len(resolve_y))], [resolve_y[k][1] for k in range(len(resolve_y))], t0, tf); 
+
+    return resolve_y
+
+
+# Solutions
+#
+# 
+#   
+#
+#
+#
+
+# Points singuliers
+#
+#
+#
 
 
 if __name__ == "__main__":
-    print(malthus_simulation(2, 2, 1)[0])
-    print(verhulst_simulation(2, 2, 3)[0])
+    #print(malthus_simulation(2, 2, 1)[0])
+    #print(verhulst_simulation(2, 2, 3)[0])
+    
+    print(lokta_simulation(4, 2, 1, 1))
+    
