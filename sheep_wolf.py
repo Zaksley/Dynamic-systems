@@ -71,31 +71,47 @@ def verhulst_simulation(y0, croissance, max):
 #           d = mortalité wolf (constant)
 # === #
 
-def draw_2D(x, y, y2, t0, tf):
-    plt.plot(x, y, 'b')
-    plt.plot(x, y2, 'r')
+def draw_2D(x, y_sheep, y_wolf, t0, tf):
+    plt.plot(x, y_sheep, 'b')
+    plt.plot(x, y_wolf, 'r')
     plt.show() 
 
 
-def lokta_simulation(reprod_sheep, death_sheep, reprod_wolf, death_wolf):
+def lokta_simulation(y0, reprod_sheep, death_sheep, reprod_wolf, death_wolf):
       # Method
     meth = step_runge_kutta
 
     # Initialisation 
     t0 = 0
-    tf = 3
+    tf = 40
     epsilon = 10**-10
     
     def f(y, t):
         return np.array( [y[0] * (reprod_sheep - y[1]*death_sheep), y[1] * (reprod_wolf*y[0] - death_wolf) ]  )
  
-    y0 = np.array([20, 3])
-
     (resolve_y, resolve_x, norm) = meth_epsilon(y0, t0, tf, epsilon, f, meth)
     print(resolve_y)
     draw_2D(resolve_x, [resolve_y[k][0] for k in range(len(resolve_y))], [resolve_y[k][1] for k in range(len(resolve_y))], t0, tf); 
 
-    return resolve_y
+    return (resolve_y, resolve_x)
+
+def period(y,t):
+    count=0
+    k=1
+    t1=0
+    t2=0
+    while (count < 2) and (k<len(y)-1):
+        if y[k-1]<=y[k] and y[k]>=y[k+1]:
+            if count==0:
+                t1=t[k]
+                count += 1
+            else:
+                t2=t[k]
+                count =+ 1
+        k += 1
+    print(t2)
+    print(t1)
+    return t2- t1
 
 
 # Solutions
@@ -108,13 +124,20 @@ def lokta_simulation(reprod_sheep, death_sheep, reprod_wolf, death_wolf):
 
 # Points singuliers
 #
-#
+# (0,0) + (d/c, a/b)
 #
 
 
 if __name__ == "__main__":
     #print(malthus_simulation(2, 2, 1)[0])
     #print(verhulst_simulation(2, 2, 3)[0])
-    
-    print(lokta_simulation(4, 2, 1, 1))
-    
+
+    a = 2/3
+    b = 4/3
+    c = 1
+    d = 1
+    y0 = np.array([1, 1])
+
+    (resolve_y, resolve_x ) = lokta_simulation(y0, a, b, c, d)
+    period_sheep = period([resolve_y[k][0] for k in range(len(resolve_y))], resolve_x)
+    print(period_sheep)

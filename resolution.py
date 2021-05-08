@@ -146,9 +146,9 @@ def meth_epsilon(y0, t0, tf, eps, f, meth):
         h /= 2.
         i += 1
 
-    x = [k*(tf-t0)/N for k in range(N//2 + 1)]
+    x = [k*h for k in range(N+1)] # //2 + 1
 
-    return (yN, x, norm)
+    return (y2N, x, norm)
 
 ## Tests
 
