@@ -83,7 +83,19 @@ def meth_n_step(y0, t0, N, h, f, meth):
     return y
 
 # Same as above, but with a multidimensionnal y (and y0)
-def meth_n_step_multidim(y0, t0, N, h, f, meth):
+def meth_n_step_2d(y0, t0, N, h, f, meth):
+    y = np.array([[0. for i in range(len(y0))] for k in range(N+1)])
+    y[0] = np.copy(y0)
+    t = t0
+
+    for i in range(N):
+        y[i+1] = np.copy(np.array(meth(y[i], t, f, h)))
+        t += h
+
+    return y
+
+# Same as above, but with a multidimensionnal y (and y0)
+def meth_n_step_3d(y0, t0, N, h, f, meth):
     y = np.array([[[0. for i in range(len(y0))] for j in range(len(y0[0]))] for k in range(N+1)])
     y[0] = np.copy(y0)
     t = t0
@@ -110,10 +122,14 @@ def meth_epsilon(y0, t0, tf, eps, f, meth):
     i = 0
     norm = []
 
-    if(isinstance(y0, int)):
+    # Checks the problem dimention
+    if(isinstance(y0, int) or isinstance(y0, float)):
         dim_method = meth_n_step
     else:
-        dim_method = meth_n_step_multidim
+        if(isinstance(y0[0], np.int32) or isinstance(y0[0], np.float64)):
+            dim_method = meth_n_step_2d
+        else:
+            dim_method = meth_n_step_3d
 
     yN = dim_method(y0, t0, N, h, f, meth)
     y2N = dim_method(y0, t0, N*2, h/2., f, meth)
